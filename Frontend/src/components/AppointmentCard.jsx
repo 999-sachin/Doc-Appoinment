@@ -44,14 +44,42 @@ export default function AppointmentCard({ appointment, onCancel }) {
         )}
       </div>
       
-      {appointment.status !== 'cancelled' && appointment.status !== 'completed' && onCancel && (
+      <div className="flex gap-3 mt-3 sm:mt-4">
+        {appointment.status !== 'cancelled' && appointment.status !== 'completed' && onCancel && (
+          <button
+            onClick={() => onCancel(appointment._id)}
+            className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors text-sm sm:text-base"
+          >
+            Cancel Appointment
+          </button>
+        )}
+
         <button
-          onClick={() => onCancel(appointment._id)}
-          className="w-full mt-3 sm:mt-4 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors text-sm sm:text-base"
+          onClick={async () => {
+            try {
+              const token = localStorage.getItem('token');
+              const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/appointments/${appointment._id}/download`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (!res.ok) throw new Error('Failed to download');
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `appointment-${appointment._id}.ics`;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (err) {
+              alert('Could not download appointment. Make sure you are logged in and try again.');
+            }
+          }}
+          className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
         >
-          Cancel Appointment
+          Download .ics
         </button>
-      )}
+      </div>
     </div>
   );
 }

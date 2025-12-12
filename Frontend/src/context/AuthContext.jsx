@@ -20,7 +20,10 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       authAPI.getMe()
         .then(res => {
-          setUser(res.data);
+          const u = res.data;
+          // normalize id: prefer `id`, fall back to `_id`
+          const normalized = { ...u, id: u.id || u._id };
+          setUser(normalized);
           setLoading(false);
         })
         .catch(() => {

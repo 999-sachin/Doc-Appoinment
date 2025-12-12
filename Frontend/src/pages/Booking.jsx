@@ -60,7 +60,12 @@ export default function Booking() {
   const handleBooking = async (e) => {
     e.preventDefault();
     setError('');
-    
+    // require login: if user not present, redirect to login with return URL
+    if (!user) {
+      navigate(`/login?next=/book/${id}`);
+      return;
+    }
+
     if (!selectedTime) {
       setError('Please select a time slot');
       return;
@@ -75,7 +80,7 @@ export default function Booking() {
     try {
       await appointmentsAPI.create({
         doctorId: id,
-        userId: user?.id || null,
+        userId: user?.id || user?._id || null,
         patientName: formData.patientName,
         patientEmail: formData.patientEmail,
         patientPhone: formData.patientPhone,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useLocation } from 'react-router-dom';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -44,7 +48,7 @@ export default function Register() {
     setLoading(false);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate(next || '/dashboard');
     } else {
       setError(result.error);
     }
